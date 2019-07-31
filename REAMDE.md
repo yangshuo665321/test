@@ -8,3 +8,10 @@
 - [环境搭建](https://blog.csdn.net/weixin_42112635/article/details/97817565)
 - [封装 HttpClient](https://blog.csdn.net/weixin_42112635/article/details/97837121)
 - [爬虫功能实现](https://blog.csdn.net/weixin_42112635/article/details/97839939)
+
+## `WebMagic` 爬虫框架
+- [crawler-webmagic](https://blog.csdn.net/weixin_42112635/article/details/97908954)：WebMagic 测试
+- [爬虫分类](https://blog.csdn.net/weixin_42112635/article/details/97943839)
+
+- [案例分析](https://blog.csdn.net/weixin_42112635/article/details/97947153)
+- [crawler-webmagic-51job](https://blog.csdn.net/weixin_42112635/article/details/97955768)：WebMagic 爬取 51job 招聘信息案例
