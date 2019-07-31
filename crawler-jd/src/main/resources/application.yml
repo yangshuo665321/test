@@ -1,0 +1,9 @@
+spring:
+  datasource: # MySQL 配置
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://120.78.134.111:3306/crawler?useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: 123456
+  jpa: # JPA 配置
+    database: mysql
+    show-sql: true
