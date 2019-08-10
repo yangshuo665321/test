@@ -1,7 +1,11 @@
 import cn.ys.es.ESApp;
 import cn.ys.es.dao.ArticleDao;
 import cn.ys.es.pojo.Article;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,11 +13,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.core.SearchResultMapper;
+import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
+import org.springframework.data.elasticsearch.core.aggregation.impl.AggregatedPageImpl;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -130,6 +139,59 @@ public class SpringDataESTest {
                 .build();
         //执行查询
         List<Article> articles = template.queryForList(query, Article.class);
+        articles.forEach(article -> System.out.println(article));
+    }
+
+    /**
+     * 从es检索数据，高亮显示
+     * @return
+     */
+    @Test
+    public void testQueryHighlight() throws Exception {
+
+        String preTag = "<font color='#dd4b39'>";//google的色值
+        String postTag = "</font>";
+
+        SearchQuery searchQuery = new NativeSearchQueryBuilder()
+                .withQuery(QueryBuilders.queryStringQuery("Spring Data").defaultField("content"))
+                .withPageable(PageRequest.of(0, 5))
+                .withHighlightFields(new HighlightBuilder.Field("title").preTags(preTag).postTags(postTag),
+                        new HighlightBuilder.Field("content").preTags(preTag).postTags(postTag))
+                .build();
+
+        // 不需要高亮直接return
+        // AggregatedPage<Idea> ideas = elasticsearchTemplate.queryForPage(searchQuery, Idea.class);
+
+        // 高亮字段
+        AggregatedPage<Article> articles = template.queryForPage(searchQuery, Article.class, new SearchResultMapper() {
+
+            @Override
+            public <T> AggregatedPage<T> mapResults(SearchResponse response, Class<T> clazz, Pageable pageable) {
+                List<Article> chunk = new ArrayList<>();
+                for (SearchHit searchHit : response.getHits()) {
+                    if (response.getHits().getHits().length <= 0) {
+                        return null;
+                    }
+                    Article article = new Article();
+                    //name or memoe
+                    HighlightField articleTitle = searchHit.getHighlightFields().get("title");
+                    if (articleTitle != null) {
+                        article.setTitle(articleTitle.fragments()[0].toString());
+                    }
+                    HighlightField articleContent = searchHit.getHighlightFields().get("content");
+                    if (articleContent != null) {
+                        article.setContent(articleContent.fragments()[0].toString());
+                    }
+
+                    chunk.add(article);
+                }
+                if (chunk.size() > 0) {
+                    return new AggregatedPageImpl<>((List<T>) chunk);
+                }
+                return null;
+            }
+        });
+
         articles.forEach(article -> System.out.println(article));
     }
 }
