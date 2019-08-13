@@ -7,3 +7,10 @@ spring:
   jpa: # JPA 配置
     database: mysql
     show-sql: true
+  data:
+    elasticsearch: # ES配置
+      cluster-name: elasticsearch-cluster # Elasticsearch 集群名(默认值: elasticsearch)
+      cluster-nodes: 120.78.134.111:9301,120.78.134.111:9302 # 集群节点地址列表，用逗号分隔。如果没有指定，就启动一个客户端节点
+      #      properties: # 用来配置客户端的额外属性
+      repositories:
+        enabled: true # 开启 Elasticsearch 仓库(默认值:true)
