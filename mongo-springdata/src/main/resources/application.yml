@@ -1,0 +1,5 @@
+spring:
+  data:
+    mongodb:
+      host: 120.78.134.111
+      database: spitdb
